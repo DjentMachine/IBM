@@ -9,7 +9,7 @@ Author: Diogo Barros
 """
 TO DO:
 To read John Harte
-Implement spatial auto-correlation
+Implement spatial auto-correlationn
 """
 
 
