@@ -21,26 +21,26 @@ import numpy as np
 
 #Set variables for the archipelago
 nIslands = 3
-mLRichness = 1000
+sppCapacity = 1000
 initRichness = 100
-years = 1000
-mainLand = []
-for i in range(mLRichness):
-    mainLand.append(1)
+years = 10000
+
 
 #Creating a test chained archipelago:
-a = chainedArchipelago(mainLand, nIslands, initRichness)
+a = chainedArchipelago(sppCapacity,nIslands,initRichness)
+a.toString()
 a.aUpdate(years)
+a.toString()
 
 #Statistics and data visualization:
-print("Island means:")
-for i in range(nIslands):
-    print(statistics.mean(a.timeRichness[i][int(len(a.timeRichness[i])/2):len(a.timeRichness[i])]))
-    print(a.coords[i])
+#print("Island means:")
+#for i in range(nIslands):
+#    print(statistics.mean(a.timeRichness[i][int(len(a.timeRichness[i])/2):len(a.timeRichness[i])]))
+#    print(a.coords[i])
 
 
 
-t=plt.scatter(list(range(-1,years)), a.timeRichness[0])
+#t=plt.scatter(list(range(-1,years)), a.timeRichness[0])
 #plt.show()
 
 
