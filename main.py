@@ -1,47 +1,53 @@
-###
-# Main file for class and object testing. Calls the model with x interactions
-# will eventually be the main class of our project
-#
-# Version 0.1
-# Author: Diogo Barros
-#
+"""
+Main file for class and object testing. Calls the model with x interactions
+will eventually be the main class of our project
+
+Version 0.1
+Author: Diogo Barros
+"""
+
+"""
+TO DO:
+To read John Harte
+Implement spatial auto-correlation
+"""
+
 
 from classes import *
-import numpy as np
 import matplotlib.pyplot as plt
 import statistics
 from matplotlib import *
+import numpy as np
 
 #Set variables for the archipelago
 nIslands = 3
 mLRichness = 1000
+initRichness = 100
 years = 1000
 mainLand = []
 for i in range(mLRichness):
     mainLand.append(1)
 
 #Creating a test chained archipelago:
-a = chainedArchipelago(mainLand, nIslands, mLRichness)
-a.toString()
+a = chainedArchipelago(mainLand, nIslands, initRichness)
 a.aUpdate(years)
-a.toString()
 
-print("First island mean:")
-print(statistics.mean(a.timeRichness[0]))
-print("Loop:")
-for i in range(3):
-    print(statistics.mean(a.timeRichness[i]))
+#Statistics and data visualization:
+print("Island means:")
+for i in range(nIslands):
+    print(statistics.mean(a.timeRichness[i][int(len(a.timeRichness[i])/2):len(a.timeRichness[i])]))
+    print(a.coords[i])
 
-#Visualizing data:
-#t=plt.scatter(list(range(0,years)), a.timeRichness[0])
+
+
+t=plt.scatter(list(range(-1,years)), a.timeRichness[0])
 #plt.show()
 
 
-
-#TO DO:
-#Chained archipelago: equilibrium is the same?
-#To read John Harte
-
+#for i in range(a.islandNr):
+#    print(sum(1 for x in a.islands[i].sourcePop if x == 1))
+#    print(a.islands[i].sourcePop)
+#    print(a.islands[i].gRichness())
 
 
     #Hav80952

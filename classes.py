@@ -1,7 +1,7 @@
 ##
 # Testing ground for SAR script
 #
-# v 0.1
+# v 0.2
 # author: Diogo Barros
 ##
 
@@ -24,14 +24,15 @@ class island:
         timeRichness - lista de numeros de tamanho x que contem a variação de richness ao longo de x anos.
     """
 
-    def __init__(self, sourcePop, initRichness = 1):
+    def __init__(self, sourcePop, initRichness = 1, isML = False):
+        self.isML = isML
         self.area = random.randint(50, 1000)
         self.richness = [0] * len(sourcePop)
         self.sourcePop = sourcePop
         self.m = random.uniform(0.5, 0.6)
         self.e = random.uniform(0.1, 0.2)
-        self.timeRichness = []
         self.iInitiate(initRichness)
+        self.timeRichness = [self.gRichness()]
 
 
     def iInitiate(self, initRichness):
@@ -41,32 +42,43 @@ class island:
         :param initRichness: the chosen initial richness for the island
         :return: n/a
         """
-        for i in range(initRichness):
-            r = random.randint(0,len(self.sourcePop)-1)
-            self.richness[r] = 1
+        if self.isML:
+            for i in range(initRichness):
+                r = random.randint(0,len(self.sourcePop)-1)
+                self.richness[r] = 1
+        else:
+            self.richness = [1] * len(self.sourcePop)
 
-    def iUpdate (self, years=1):
+
+
+    def iUpdate (self, sourcePop, years=1):
         """
         Update function used to simulate the passage of time. Each update adds a species to Richness based on migration
         (m) and extinguishes another based on the e parameter
         """
         for i in range(years):
+            self.sourcePop = sourcePop
             self.migrate()
             self.extinguish()
+            self.timeRichness.append(self.gRichness())
 
-    def migrate(self):#, mainLand, target):
+    def migrate(self):
         """
-        A function that causes migration of 1 random species from one place to another with a given m probability
+        A function that causes migration of 1 random species from one place to another with a given m probability.
+        A species only migrates if it exists in Source Population and is not yet on the island
         :param mainLand:
         :param target:
-        :return:
+        :return: possibly causes migration of 1 species
         """
         rM = random.uniform(0, 1)
         r1 = random.randint(1, len(self.richness))
-        if self.richness[r1 - 1] == 0 and rM < self.m:  #A species migrates with prob. m
-            self.richness[r1 - 1] = 1
+        if  self.sourcePop[r1 - 1] == 1 and\
+                self.richness[r1 - 1] == 0 and\
+                rM < self.m:                        # A species migrates with probability m
+                    self.richness[r1 - 1] = 1
 
-    def extinguish(self):#, mainLand, target):
+
+    def extinguish(self):
         """
         A function that causes extinction of 1 random species from one place to another with a given m probability
         :param mainLand:
@@ -77,7 +89,7 @@ class island:
         r2 = random.randint(1, len(self.richness))
         if self.richness[r2 - 1] == 1 and rE < self.e:  # A species goes extinct with prob. e
             self.richness[r2 - 1] = 0
-        self.timeRichness.append(self.gRichness())
+
 
     def gArea(self):
         """
@@ -126,13 +138,17 @@ class chainedArchipelago:
      e (for extintion) parameters. They all assume the same Main Land.
     """
 
-    def __init__(self, mainLand, islandNumber, initRichness=1):
+    def __init__(self, mainLand, islandNumber, initRichness=1, coordRange=[38, -26], aWidth=2):
         self.islandNr = islandNumber
         self.mainLand = mainLand
         self.islands = []
         self.iRichness = []
         self.timeRichness = []
+        self.coords = []
         for i in range(islandNumber):
+            lat = random.uniform(coordRange[0]-aWidth,coordRange[0]+aWidth)
+            lon = random.uniform(coordRange[1]-aWidth,coordRange[1]+aWidth)
+            self.coords.append([lat,lon])
             if i == 0:
                 self.islands.append(island(mainLand, initRichness))
             else:
@@ -145,10 +161,41 @@ class chainedArchipelago:
         Updates archipelago with each interaction
         """
         for i in range(self.islandNr):
-            self.islands[i].iUpdate(years)
+            if i == 0:
+                self.islands[i].iUpdate(self.mainLand, years)
+            else:
+                self.islands[i].iUpdate(self.islands[i-1].gRichnessList(), years)
             self.iRichness[i] = self.islands[i].gRichness()
 
-    def areas(self):
+    def __distMatrix(self, coordMatrix):
+        """
+        Function to give out distance matrix out of 2 collumns of WGS86 coordinates:
+        Latitude first col, longitude 2nd col
+
+        :param coords:
+        :return: A distance matrix (list of lists)
+        """
+        coords = np.deg2rad(coordMatrix)
+        dist = [[0 for col in range(len(coords))] for row in range(len(coords))]
+        for i in range(len(dist)):
+            for j in range(len(dist[0])):
+                dlat = coords[j][0] - coords[i][0]
+                dlon = coords[j][1] - coords[i][1]
+                hav = (np.sin(dlat / 2)) ** 2 + np.cos(coords[i][1]) * np.cos(coords[j][1]) * (np.sin(dlon / 2)) ** 2
+                c = 2 * np.arctan2(sqrt(hav), sqrt(1 - hav))
+                r = 6378100  # where R is the radius of the Earth
+                dist[i][j] = r * c
+        return dist
+
+    def spatialAutocorr(self, coords):
+        """
+        Integrates spatial autocorrelation. Used in the migration function
+        :return:
+        """
+
+
+
+    def areas (self):
         """
         Method for creating a list with all areas
         """
