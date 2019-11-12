@@ -23,7 +23,7 @@ import numpy as np
 nIslands = 3
 sppCapacity = 1000
 initRichness = 100
-years = 10000
+years = 1000
 
 
 #Creating a test chained archipelago:
