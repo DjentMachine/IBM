@@ -14,6 +14,7 @@
 import random
 import numpy as np
 from math import sqrt
+import math
 
 class island:
     """
@@ -28,8 +29,9 @@ class island:
     def __init__(self, sppCapacity, isML=False, coordRange=[38, -26], aWidth=2, initRichness = 1):
         self.isML = isML
         self.area = random.randint(50, 1000)
-        self.coords = [random.uniform(coordRange[0] - aWidth, coordRange[0] + aWidth),
-                       random.uniform(coordRange[1] - aWidth, coordRange[1] + aWidth)]
+        self.coords = coordRange
+            #[random.uniform(coordRange[0] - aWidth, coordRange[0] + aWidth),
+             #          random.uniform(coordRange[1] - aWidth, coordRange[1] + aWidth)]
         if isML: self.richness = [1] * sppCapacity
         else: self.richness = [0] * sppCapacity
         self.iInitiate(initRichness)
@@ -45,6 +47,46 @@ class island:
             for i in range(initRichness):
                 r = random.randint(0,len(self.richness)-1)
                 self.richness[r] = 1
+
+    def migrate(self, sourceIsland):
+        """
+        A function that causes migration of 1 random species from one place to another with a given m probability.
+        A species only migrates if it exists in Source Population and is not yet on the island
+        :param mainLand:
+        :param target:
+        :return: possibly causes migration of 1 species
+        """
+        rM = random.uniform(0, 1)
+        mCoeff = random.uniform(0.8, 1)*(math.e**(-self.distance(sourceIsland)/100000)) #The Bigger, the more likely to migrate
+        rPosition = random.randint(0, len(self.richness)-1)
+        if self.richness[rPosition] == 0 and \
+                rM < mCoeff:  # A species migrates with probability m
+            self.richness[rPosition] = 1
+
+    def extinguish(self):
+        """
+        A function that causes extinction of 1 random species from one place to another with a given m probability
+        :param mainLand:
+        :param target:
+        :return:
+        """
+        rE = random.uniform(0, 1)
+        eCoeff = random.uniform(0, 0.1)
+        rPosition = random.randint(0, len(self.richness)-1)
+        if self.richness[rPosition] == 1 and \
+            rE < eCoeff:  # A species goes extinct  with probability e
+            self.richness[rPosition] = 0
+
+    def distance(self, sourceIsland):
+        """
+        Calculates distance between 2 islands
+        :return:
+        """
+        dlat = np.deg2rad(self.coords[0] - sourceIsland.coords[0])
+        dlon = np.deg2rad(self.coords[1] - sourceIsland.coords[1])
+        hav = (np.sin(dlat / 2)) ** 2 + np.cos(self.coords[1]) * np.cos(sourceIsland.coords[1])\
+              * (np.sin(dlon / 2)) ** 2
+        return 2 * np.arctan2(sqrt(hav), sqrt(1 - hav)) * 6378100  # c * R , where R=6378100 is the radius of the Earth
 
     def gArea(self):
         """
@@ -68,7 +110,6 @@ class island:
               (self.area, self.gRichness()))
         print(self.richness)
 
-
 class chainedArchipelago:
     """
     Testing for the archipelago class. A normal archipelago has x islands with different m (for distance) and
@@ -83,54 +124,41 @@ class chainedArchipelago:
         self.timeRichness = []
         self.iCoords = []
         for i in range(islandNr):
-            self.islands.append(island(sppCapacity, False, [38, -26], aWidth, initRichness))
+            self.islands.append(island(sppCapacity, False, coordRange, aWidth, initRichness))
             self.iRichness.append(self.islands[i].gRichness())
-            self.timeRichness.append(self.iRichness)
             self.iCoords.append(self.islands[i].coords)
+        self.timeRichness.append(self.iRichness)
 
     def aUpdate (self, years=1):
         """
         Updates archipelago with each interaction
         """
-        for i in range(self.islandNr):
-            for j in range(years):
-                self.migrate()
-                self.extinguish()
-            self.iRichness[i] = self.islands[i].gRichness()
+        for i in range(years):
+            for j in range(self.islandNr):
+                self.aMigrate()
+                self.aExtinguish()
+                self.iRichness[j] = self.islands[j].gRichness()
             self.timeRichness.append(self.iRichness)
 
-    def migrate(self):
+    def aMigrate(self):
         """
-        A function that causes migration of 1 random species from one place to another with a given m probability.
-        A species only migrates if it exists in Source Population and is not yet on the island
-        :param mainLand:
-        :param target:
-        :return: possibly causes migration of 1 species
-        """
-        for i in range(self.islandNr):
-            for j in range(self.islandNr):
-                rM = random.uniform(0, 1)
-                mCoeff = random.uniform(0.5, 0.6)/(self.distMatrix(self.iCoords)[i][j]+1)
-                rPosition = random.randint(0, len(self.islands[i].richness)-1)
-                if self.islands[i].richness[rPosition] == 0 and \
-                        self.islands[j].richness[rPosition] == 1 and \
-                        rM < mCoeff:  # A species migrates with probability m
-                    self.islands[i].richness[rPosition] = 1
-
-    def extinguish(self):
-        """
-        A function that causes extinction of 1 random species from one place to another with a given m probability
-        :param mainLand:
-        :param target:
+        Causes migration from 1 neighbouring island to a target island with a probability m
+        :param island:
         :return:
         """
         for i in range(self.islandNr):
-            rE = random.uniform(0, 1)
-            eCoeff = random.uniform(0.1, 0.2)
-            rPosition = random.randint(0, len(self.islands[i].richness)-1)
-            if self.islands[i].richness[rPosition] == 1 and \
-                rE < eCoeff:  # A species goes extinct  with probability e
-                self.islands[i].richness[rPosition] = 0
+            for j in range(self.islandNr):
+                self.islands[i].migrate(self.islands[j])
+
+    def aExtinguish(self):
+        """
+        Extinguishes one species form an island in an archipelago with a probability e
+        :param island:
+        :return:
+        """
+        for i in range(self.islandNr):
+            self.islands[i].extinguish()
+
 
     def distMatrix(self, coordsMatrix):
         """
@@ -177,5 +205,8 @@ class chainedArchipelago:
               "Nr of islands: %d\nRichness is the islands:" %
               len(self.islands))
         print(self.iRichness)
+
+
+
 
 

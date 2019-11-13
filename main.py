@@ -23,14 +23,28 @@ import numpy as np
 nIslands = 3
 sppCapacity = 1000
 initRichness = 100
-years = 1000
+years = 10000
 
+#i=island(sppCapacity, coordRange=[36,-25])
+#i2=island(sppCapacity, coordRange=[35,-25], isML=True)
+#print(i.coords)
+#print(i2.coords)
+#print(i.distance(i2))
+#i2.toString()
+#i.toString()
+#for j in range(100):
+#    i.migrate(i2)
+#for j in range(100):
+#    i.extinguish()
+#i.toString()
 
 #Creating a test chained archipelago:
 a = chainedArchipelago(sppCapacity,nIslands,initRichness)
 a.toString()
 a.aUpdate(years)
 a.toString()
+
+#print(a.timeRichness)
 
 #Statistics and data visualization:
 #print("Island means:")
