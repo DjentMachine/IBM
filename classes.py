@@ -9,6 +9,7 @@
 # TODO:
 #
 # Set randomness on Time = 1 islands. Islands are getting the same Time = 1 richness
+# Finalize Update method for islands, implement updatting to ISland object and not archipelago obejct
 #
 
 import random
@@ -35,6 +36,7 @@ class island:
         if isML: self.richness = [1] * sppCapacity
         else: self.richness = [0] * sppCapacity
         self.iInitiate(initRichness)
+        self.timeRichness = []
 
     def iInitiate(self, initRichness):
         """
@@ -47,6 +49,14 @@ class island:
             for i in range(initRichness):
                 r = random.randint(0,len(self.richness)-1)
                 self.richness[r] = 1
+        self.timeRichness = self.gRichness()
+
+    def update(self):
+        """
+        Updates island with migration and extinction. WIP
+        :return:
+        """
+        self.timeRichness.append(self.gRichness())
 
     def migrate(self, sourceIsland):
         """
@@ -121,13 +131,14 @@ class chainedArchipelago:
         self.mainLand = island(sppCapacity, isML=True)
         self.islands = []
         self.iRichness = []
-        self.timeRichness = []
+        self.timeRichness = [[] for i in range(islandNr)]
         self.iCoords = []
         for i in range(islandNr):
             self.islands.append(island(sppCapacity, False, coordRange, aWidth, initRichness))
             self.iRichness.append(self.islands[i].gRichness())
+            self.timeRichness[i].append(self.iRichness[i])
             self.iCoords.append(self.islands[i].coords)
-        self.timeRichness.append(self.iRichness)
+
 
     def aUpdate (self, years=1):
         """
@@ -138,7 +149,8 @@ class chainedArchipelago:
                 self.aMigrate()
                 self.aExtinguish()
                 self.iRichness[j] = self.islands[j].gRichness()
-            self.timeRichness.append(self.iRichness)
+                self.timeRichness[j].append(self.islands[j].gRichness())
+
 
     def aMigrate(self):
         """
@@ -158,6 +170,15 @@ class chainedArchipelago:
         """
         for i in range(self.islandNr):
             self.islands[i].extinguish()
+
+    def gTimeRichness(self, islandNr, min, max):
+        """
+        Returns the richness from a given island from a set interval of time
+        :param island:
+        :return: a vector with the time richness
+        """
+        return self.timeRichness[islandNr][min:max]
+
 
 
     def distMatrix(self, coordsMatrix):

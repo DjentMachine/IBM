@@ -16,52 +16,54 @@ Implement spatial auto-correlationn
 from classes import *
 import matplotlib.pyplot as plt
 import statistics
-from matplotlib import *
+#from matplotlib import *
 import numpy as np
 
 #Set variables for the archipelago
 nIslands = 3
 sppCapacity = 1000
 initRichness = 100
-years = 10000
-
-#i=island(sppCapacity, coordRange=[36,-25])
-#i2=island(sppCapacity, coordRange=[35,-25], isML=True)
-#print(i.coords)
-#print(i2.coords)
-#print(i.distance(i2))
-#i2.toString()
-#i.toString()
-#for j in range(100):
-#    i.migrate(i2)
-#for j in range(100):
-#    i.extinguish()
-#i.toString()
+years = 1000
+pStart = int(years/2)
+pEnd = years
 
 #Creating a test chained archipelago:
 a = chainedArchipelago(sppCapacity,nIslands,initRichness)
-a.toString()
 a.aUpdate(years)
-a.toString()
-
-#print(a.timeRichness)
 
 #Statistics and data visualization:
-#print("Island means:")
-#for i in range(nIslands):
-#    print(statistics.mean(a.timeRichness[i][int(len(a.timeRichness[i])/2):len(a.timeRichness[i])]))
-#    print(a.coords[i])
+print("Initial richness for all islands:")
+for i in range(nIslands):
+    print("Island %d : %d" % (i, a.timeRichness[i][0]))
+
+print("\nIsland mean richness between year %d and %d:" % (pStart,pEnd))
+for i in range(nIslands):
+    print("Island %d mean: %f" % (i, statistics.mean(a.gTimeRichness(i,pStart,pEnd))))
+
+#Visualizing 1 island
+t=plt.scatter(list(range(-1,years)), a.timeRichness[0])
+plt.show()
 
 
 
-#t=plt.scatter(list(range(-1,years)), a.timeRichness[0])
-#plt.show()
 
 
-#for i in range(a.islandNr):
-#    print(sum(1 for x in a.islands[i].sourcePop if x == 1))
-#    print(a.islands[i].sourcePop)
-#    print(a.islands[i].gRichness())
+#Simulating multiple archipelagos:
+
+#Islands characteristics
+#nIslands = 3
+#sppCapacity = 100
+#initRichness = 100
+#years = 100
+
+#Archipelagos characteristics:
+#nrArchipelagos = 2
+#archipelagos = [chainedArchipelago(sppCapacity,nIslands) for i in range(nrArchipelagos)]
+
+#for i in range(nrArchipelagos):
+#    archipelagos[i] = chainedArchipelago(sppCapacity, nIslands, initRichness)
 
 
-    #Hav80952
+
+
+#Hav80952
