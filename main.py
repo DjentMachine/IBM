@@ -6,24 +6,22 @@ Version 0.1
 Author: Diogo Barros
 """
 
-"""
-TO DO:
-To read John Harte
-Implement spatial auto-correlationn
-"""
+##
+# TODO: To read John Harte
+##
 
 
 from classes import *
 import matplotlib.pyplot as plt
 import statistics
 #from matplotlib import *
-import numpy as np
+#import numpy as np
 
 #Set variables for the archipelago
 nIslands = 3
 sppCapacity = 1000
 initRichness = 100
-years = 1000
+years = 2000
 pStart = int(years/2)
 pEnd = years
 
@@ -35,6 +33,10 @@ a.aUpdate(years)
 print("Initial richness for all islands:")
 for i in range(nIslands):
     print("Island %d : %d" % (i, a.timeRichness[i][0]))
+
+print("\nFinal richness for all islands:")
+for i in range(nIslands):
+    print("Island %d : %d" % (i, a.timeRichness[i][len(a.timeRichness[i])-1]))
 
 print("\nIsland mean richness between year %d and %d:" % (pStart,pEnd))
 for i in range(nIslands):

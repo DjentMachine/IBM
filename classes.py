@@ -6,11 +6,8 @@
 ##
 
 ##
-# TODO:
-#
-# Set randomness on Time = 1 islands. Islands are getting the same Time = 1 richness
-# Finalize Update method for islands, implement updatting to ISland object and not archipelago obejct
-#
+# TODO: Take care of variable AMax. It's not set to 1000, as its the max possible value
+##
 
 import random
 import numpy as np
@@ -67,10 +64,12 @@ class island:
         :return: possibly causes migration of 1 species
         """
         rM = random.uniform(0, 1)
-        mCoeff = random.uniform(0.8, 1)*(math.e**(-self.distance(sourceIsland)/100000)) #The Bigger, the more likely to migrate
+        #mCoeff = random.uniform(0.8, 1)*(math.e**(-self.distance(sourceIsland)/100000)) #The Bigger, the more likely to migrate
+        epsilon = math.e**(-self.distance(sourceIsland)/100000) #The Bigger, the more likely to migrate
+        iRate = 1-epsilon*(self.gRichness()/len(self.richness))**(self.area/1000) #1000 = maxArea
         rPosition = random.randint(0, len(self.richness)-1)
         if self.richness[rPosition] == 0 and \
-                rM < mCoeff:  # A species migrates with probability m
+                rM < iRate:  # A species migrates with probability m
             self.richness[rPosition] = 1
 
     def extinguish(self):
@@ -81,10 +80,12 @@ class island:
         :return:
         """
         rE = random.uniform(0, 1)
-        eCoeff = random.uniform(0, 0.1)
+        #eCoeff = random.uniform(0, 0.1)
+        gamma = random.uniform(0, 0.1)
+        eRate = gamma*(self.gRichness()/len(self.richness))**(1/self.area)
         rPosition = random.randint(0, len(self.richness)-1)
         if self.richness[rPosition] == 1 and \
-            rE < eCoeff:  # A species goes extinct  with probability e
+            rE < eRate:  # A species goes extinct  with probability e
             self.richness[rPosition] = 0
 
     def distance(self, sourceIsland):
@@ -228,6 +229,15 @@ class chainedArchipelago:
         print(self.iRichness)
 
 
+#Er = extinction rate
+#Ir  immigration rate
 
+#Ir=1-epsilon(S/ST)^+alpha  ; 0<=alpha<1; E<1
+#Er=gamma(b/ST)^beta ; 1<= beta, gamma<1
+
+#Ir=Er -> Equilibrium:Seq
+
+#Aplha=A/Amax
+#Beta=1/a ou Beta = Amax/A (need to define Amax)
 
 
