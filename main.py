@@ -2,7 +2,7 @@
 Main file for class and object testing. Calls the model with x interactions
 will eventually be the main class of our project
 
-Version 0.9
+Version 0.10
 Author: Diogo Barros
 """
 
@@ -12,26 +12,25 @@ Author: Diogo Barros
 ##
 
 import time
-import os.path
-import math
-import statistics as st
-import numpy as np
+#import os.path
+#import math
+#import statistics as st
+#import numpy as np
+#import pandas as pd
 import seaborn as sns
-import pandas as pd
 import matplotlib.pyplot as plt
 plt.style.use('seaborn-whitegrid')
 from classes import *
 
 #Set variables for the system: simulating multiple archipelagos:
-archipelagoNr = 3
+archipelagoNr = 5
 arches = []
-islandNr = 10
+islandNr = 25
 sppCapacity = 1000
 initRichness = 10
-years = 1000
+years = 3000
 yearStart = int(years/2)
 yearEnd = yearStart+100
-
 
 #Start simulation and print information for archipelagos
 startTime = time.time()
@@ -73,7 +72,7 @@ timeRichness= pd.DataFrame({"Time": [i for i in range(years+1)]})
 for z in range(len(arches)):
     for i in range(arches[z].islandNr):
         timeRichness["A{} - Island {}".format(i+1, z+1)] = arches[0].timeRichness[i]
-"""
+
 #Visualizing data: species growth throughout time in an archipelago
 archipelago=0
 rows = 2
@@ -84,10 +83,20 @@ for i in range(arches[0].islandNr):
     plt.title("Island %d" %(i+1))
 plt.xlabel("Time")
 plt.ylabel("Richness")
-plt.suptitle("Richness over time in archipelago %d" %(archipelago+1),fontsize=20, weight=20)
+plt.suptitle("Richness over time in archipelago %d" % (archipelago+1), fontsize=20, weight=20)
+
+#Visualizing data: Species-Area relationship per Archipelago
+sns.lmplot(y="Richness", x="Area", col="Archipelago", data=data, col_wrap=5).fig.suptitle("scattered archipelagos")
+plt.subplots_adjust(top=0.93)
+
+#Outputting data
+#scaz.to_csv("/Users/diogobarros/Desktop/scaz.csv")
+#data.to_csv("/Users/diogobarros/Desktop/sarLogData.csv")
+#timeRichness.to_csv("/Users/diogobarros/Desktop/timeRichness.csv")
+
 """
 #Plotting coordinates of islands
-"""
+
 a = []
 b = []
 for i in range(len(arches[0].iCoords)):
@@ -95,19 +104,10 @@ for i in range(len(arches[0].iCoords)):
     b.append(arches[0].iCoords[i][1])
 a.append(arches[0].mainLand.coords[0])
 b.append(arches[0].mainLand.coords[1])
-plt.scatter(a,b)
-plt.title("Island coordinates",fontsize=20, weight=20)
+plt.scatter(a, b)
+plt.title("Island coordinates", fontsize=20, weight=20)
 plt.xlabel("Longitude")
 plt.ylabel("Latitude")
 plt.show()
 """
-
-#Visualizing data: Species-Area relationship per Archipelago
-#sns.lmplot(y="Richness", x="Area", col="Archipelago", data=data).fig.suptitle("Irate=e^(-d+A)")#, size=4,col_wrap=5)
-#plt.subplots_adjust(top=0.85)
-#Outputting data
-#scaz.to_csv("/Users/diogobarros/Desktop/scaz.csv")
-#data.to_csv("/Users/diogobarros/Desktop/sarLogData.csv")
-#timeRichness.to_csv("/Users/diogobarros/Desktop/timeRichness.csv")
-
 

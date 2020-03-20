@@ -5,12 +5,15 @@
 # author: Diogo Barros
 ##
 
+#TESTERINOOOOO
+
 ##
 # TODO: Think about AMin possibility. Does it make sense for a user to set min and max values for area?
-# TODO: understand why both math and sqrt are needed
 # TODO: updat timeRichness in islands and archipelagos. Make one dependent of the other (IMPORTANT)
 # TODO: set __str__ instead of creating a toString as in java
+# TODO: All functions like timeRichness need to return a DataFrame as to be more readable and workable
 # TODO: Pass Update into Island class
+# TODO: Cmo podemos alterar os valores de modo a ter uma maior game de app entre as diferentes ilhas
 ##
 
 import random
@@ -66,14 +69,8 @@ class Island:
         :return: possibly causes migration of 1 species
         """
         rM = random.uniform(0, 1)
-        #alpha =  (self.distance(sourceIsland) - self.distance(sourceIsland)) /10000
-        #alpha = math.e**(-self.distance(sourceIsland))*math.e**(self.area)  # TOO LARGE!
-        #alpha = self.area*math.e**(-self.distance(sourceIsland))
-        #alpha = self.distance(sourceIsland)/self.area
-        #alpha = math.e**(-(self.distance(sourceIsland))/self.area)  # 0<=alpha<=1,larger == + likely migration occurs
-        #iRate = 1 - (self.gRichness() / len(self.sppCapacity)) ** alpha  # IR=1-(S/ST)^alpha
-        iRate = 1 - math.e**((-self.distance(sourceIsland)/(self.area/1000)))
-        #iRate = 1 - math.e**((-1/(self.area/1000)))
+        iRate = 1 - math.e ** ((-self.distance(sourceIsland) / (self.area / 1000)))
+        #iRate = I0*(len(self.sppCapacity)- self.gRichness())
         rPosition = random.randint(0, len(self.sppCapacity) - 1)
         if self.sppCapacity[rPosition] == 0 and \
                 rM < iRate:  # A species migrates with probability m
@@ -86,8 +83,8 @@ class Island:
         """
         rE = random.uniform(0, 1)
         gamma = random.uniform(0, 1)                                 # ??? meaning of this variable?
-        beta = self.area/50                                          # Beta >= 1, =area/minArea
-        eRate = gamma * (self.gRichness() / len(self.sppCapacity)) ** beta    # Er= gamma*(s/ST)^Beta, gamma >=1
+        #beta = self.area/50                                         # Beta >= 1, =area/minArea
+        eRate = gamma ** self.area    # Er= gamma*(s/ST)^Beta, gamma >=1 (self.gRichness() / len(self.sppCapacity))
         rPosition = random.randint(0, len(self.sppCapacity) - 1)
         if self.sppCapacity[rPosition] == 1 and rE < eRate:  # A species goes extinct  with probability e
             self.sppCapacity[rPosition] = 0
@@ -137,7 +134,7 @@ class Island:
 ##
 
 class Archipelago:
-    def __init__(self, sppCapacity, islandNr, initRichness=1, coordRange=[[39, 35], [-24,-27]], Amax=1000,
+    def __init__(self, sppCapacity, islandNr, initRichness=1, coordRange=[[39, 35], [-24,-27]], Amax=10000,
                  iWidth=2, aType="scattered"):
         """
         Constructor for the Archipelago class. An archipelago has x islands with different migration and
@@ -194,6 +191,9 @@ class Archipelago:
                 self.islands[i].migrate(self.mainLand)       # every island gets spp from Main Land
                 for j in range(i):
                     self.islands[i].migrate(self.islands[j])
+        else:
+            print("NOT A VALID ARCHIPELAGO!")
+            exit()
 
 
     def aExtinguish(self):
